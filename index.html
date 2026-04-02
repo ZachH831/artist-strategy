@@ -1466,17 +1466,35 @@
     }
 
     // ── Cloudflare Worker URL ── update this after deploying your worker
-    const WORKER_URL = 'wandering-leaf-0774.zach-henault.workers.dev';
+    const WORKER_URL = 'https://wandering-leaf-0774.zach-henault.workers.dev';
 
-    async function callStrategy(artistData, preview) {
-      const res = await fetch(WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ artistData, preview })
-      });
-      if (!res.ok) throw new Error('API error');
-      return data.text;
+ async function callStrategy(artistData, preview) {
+  const res = await fetch(WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ artistData, preview })
+  });
+  if (!res.ok) throw new Error('API error');
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let fullText = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const parsed = JSON.parse(line);
+        if (parsed.text) fullText += parsed.text;
+      } catch {}
     }
+  }
+  return fullText;
+}
 
     async function streamStrategy(artistData, preview, onChunk) {
       const res = await fetch(WORKER_URL, {
