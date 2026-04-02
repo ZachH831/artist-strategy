@@ -132,7 +132,7 @@ Geographic focus: ${artistData.geo}
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: preview ? 600 : 4000,
+        max_tokens: preview ? 600 : 3000,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }]
       })
