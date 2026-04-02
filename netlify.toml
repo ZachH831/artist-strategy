@@ -3,6 +3,9 @@
   functions = "netlify/functions"
 
 [functions]
+  node_bundler = "esbuild"
+
+[functions.strategy]
   timeout = 26
 
 [[headers]]
